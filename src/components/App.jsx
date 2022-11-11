@@ -25,15 +25,47 @@ export default function App() {
   const [modalImage, setModalImage] = useState('');
   const [imageAlt, setImageAlt] = useState('');
 
+  // useEffect(() => {
+  //   if (!imageName) {
+  //     return;
+  //   }
+
+  //   setStatus(Status.PENDING);
+
+  //   const fetchImages = () => {
+  //     fetchPictures(imageName, page)
+  //       .then(images => {
+  //         if (images.hits.length < 1) {
+  //           setShowButton(false);
+  //           setStatus(Status.IDLE);
+  //           return alert('No images on your query');
+  //         }
+
+  //         setImages(prevState => [...prevState, ...images.hits]);
+  //         setShowButton(page < Math.ceil(images.total / 12) ? true : false);
+  //         setStatus(Status.RESOLVED);
+  //       })
+  //       .then(console.log(images))
+  //       .catch(error => {
+  //         console.log(error);
+  //         setStatus(Status.REJECTED);
+  //       });
+  //   };
+
+  //   fetchImages();
+  // }, [imageName, page]);
+
   useEffect(() => {
     if (!imageName) {
       return;
     }
 
-    setStatus(Status.PENDING);
+    async function fetchImages() {
+      setStatus(Status.PENDING);
 
-    fetchPictures(imageName, page)
-      .then(images => {
+      try {
+        const images = await fetchPictures(imageName, page);
+
         if (images.hits.length < 1) {
           setShowButton(false);
           setStatus(Status.IDLE);
@@ -42,13 +74,16 @@ export default function App() {
 
         setImages(prevState => [...prevState, ...images.hits]);
         setShowButton(page < Math.ceil(images.total / 12) ? true : false);
+
+        console.log(images.hits);
         setStatus(Status.RESOLVED);
-      })
-      .then(console.log(images))
-      .catch(error => {
+      } catch (error) {
         console.log(error);
         setStatus(Status.REJECTED);
-      });
+      }
+    }
+
+    fetchImages();
   }, [imageName, page]);
 
   const handleFormSubmit = searchImage => {
